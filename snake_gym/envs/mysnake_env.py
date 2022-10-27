@@ -19,7 +19,6 @@ class SnakeEnv(gym.Env):
                  time_penalty=0, food_reward=10, loss_penalty=-10, win_reward=100):
         self.action_space = spaces.Discrete(3)
         self.ACTIONS = ["STRAIGHT", "LEFT", "RIGHT"]
-        # self.observation_space = spaces.Box(0, 2, (height + 2, width + 2), dtype="uint8")
         self.observation_space = spaces.Box(0, 2, (11,), dtype="uint8")
         self.viewer = None
         self.seed()
@@ -62,8 +61,7 @@ class SnakeEnv(gym.Env):
         # place food on the field
         self.food = self._generate_food()
 
-
-        # self.my_state = np.zeros((11,), dtype="uint8")
+        # Create a new state of the snake to train the model
         self.my_state = self.get_state()
 
     def seed(self, seed=None):
@@ -87,28 +85,14 @@ class SnakeEnv(gym.Env):
 
         return y, x
 
+    # Function to predict the collision of the snake with your environment
     def check_for_collision_agent(self, y, x):
-        # done = False
-        # pop = True
-        # reward = self.time_penalty
         bool_collision = False
         if self.state[y][x]:
+            bool_collision = True
+            # If the head-snake collides with the food so returns false
             if self.state[y][x] == 2:
                 bool_collision = False
-                # pop = False
-                # reward += self.food_reward
-                # self.snake_size += 1
-                # if self.snake_size == self.max_size:
-                #    reward += self.win_reward
-                #    self.game_over = done = True
-                # self.food = self._generate_food()
-            else:
-                bool_collision = True
-                # reward += self.loss_penalty
-                # self.game_over = done = True
-                # pop = False
-
-        # self.state[y][x] = 1
 
         return bool_collision
 
@@ -230,39 +214,30 @@ class SnakeEnv(gym.Env):
             self.viewer.close()
             self.viewer = None
 
-###################################################
+    # Function to return the actual state of the snake
     def get_state(self):
+        # Position of the head of the snake
         y, x = self.snake[-1]
+
+        # Positions of the left, right, up and down pixels of the head-snake
         (yl, xl) = (y, x - 1)
         (yr, xr) = (y, x + 1)
         (yu, xu) = (y - 1, x)
         (yd, xd) = (y + 1, x)
-        # point_l = Point(head.x - 20, head.y)
-        # point_r = Point(head.x + 20, head.y)
-        # point_u = Point(head.x, head.y - 20)
-        # point_d = Point(head.x, head.y + 20)
 
-        # rl, dl, pl = self.check_for_collision(yl, xl)
-        # b_l = self.bool_col
+        # Get the danger-state of each pixel
         b_l = self.check_for_collision_agent(yl, xl)
-
-        # rr, dr, pr = self._check_for_collision(yr, xr)
-        # b_r = self.bool_col
         b_r = self.check_for_collision_agent(yr, xr)
-
-        # ru, du, pu = self._check_for_collision(yu, xu)
-        # b_u = self.bool_col
         b_u = self.check_for_collision_agent(yu, xu)
-
-        # rd, dd, pd = self._check_for_collision(yd, xd)
-        # b_d = self.bool_col
         b_d = self.check_for_collision_agent(yd, xd)
-
+        
+        # Actual direction of the snake
         dir_l = self.direction == (0, -1)
         dir_r = self.direction == (0, 1)
         dir_u = self.direction == (-1, 0)
         dir_d = self.direction == (1, 0)
-
+        
+        # Position of the food
         y_food, x_food = self.food
 
         state = [
@@ -295,11 +270,6 @@ class SnakeEnv(gym.Env):
             x_food > x,
             y_food < y,
             y_food > y
-            # game.food.x < game.head.x,  # food left
-            # game.food.x > game.head.x,  # food right
-            # game.food.y < game.head.y,  # food up
-            # game.food.y > game.head.y  # food down
             ]
 
         return np.array(state, dtype=int)
-#######################################################

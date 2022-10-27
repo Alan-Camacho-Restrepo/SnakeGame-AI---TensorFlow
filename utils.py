@@ -93,7 +93,7 @@ def plot_history(reward_history, rolling_window=20, lower_limit=None,
     
 def display_table(initial_state, action, next_state, reward, done):
 
-    action_labels = ["Do nothing", "Left", "Right"]
+    action_labels = ["STRAIGHT", "LEFT", "RIGHT"]
     
     # Do not use column headers
     column_headers = None
